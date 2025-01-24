@@ -1,10 +1,11 @@
 import mongoose, { FilterQuery } from "mongoose";
-import { IRole } from "../models/rolesModel";
+import { IRole, Role } from "../models/rolesModel";
 import { IUser, PopulatedUser, User } from "../models/userModel";
 import bcrypt from "bcrypt";
 import generateRandomPassword from "../helpers/randomPassword";
 import RegisterationMail from "./emails/registeration";
 import { HydratedDocument } from "mongoose";
+import MainWebsiteRole from "../helpers/mainWebsiteRole";
 
 export interface ICheckUser {
   _id?: mongoose.Types.ObjectId;
@@ -65,14 +66,20 @@ export const getAllUsers = async (
   return allUsers;
 };
 
-export const createNewUser = async (name: string, email: string) => {
+export const createNewUser = async (name: string, email: string, teamRole: number) => {
   const password: string = generateRandomPassword(7);
   const hashed_password: string = await bcrypt.hash(password, 10);
+
+  //Finding the role_id based on teamRole
+  const role = await Role.findOne({ name: MainWebsiteRole[teamRole] });
+  const role_id = role ? role._id : null;
 
   const user = await User.create({
     name: name,
     email: email,
     password: hashed_password,
+    team_role: teamRole,
+    role_id: role_id
   });
 
   const reg_mail = new RegisterationMail(user, password);

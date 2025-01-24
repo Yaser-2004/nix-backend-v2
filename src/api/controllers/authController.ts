@@ -142,7 +142,7 @@ export const refresh = asyncErrorHandler(async (req, res, next) => {
  */
 
 export const signup = asyncErrorHandler(async (req, res, next) => {
-  const { name, username: email } = req.body;
+  const { name, username: email, teamRole } = req.body;
 
   if (!email || !name) {
     const error = new CustomError(
@@ -163,7 +163,7 @@ export const signup = asyncErrorHandler(async (req, res, next) => {
     return next(error);
   }
 
-  await UserService.createNewUser(name, email);
+  await UserService.createNewUser(name, email, teamRole);
 
   res.status(StatusCode.CREATED).json({
     status: "success",
@@ -171,6 +171,7 @@ export const signup = asyncErrorHandler(async (req, res, next) => {
     data: {
       name,
       email,
+      teamRole: teamRole,
     },
   });
 });
